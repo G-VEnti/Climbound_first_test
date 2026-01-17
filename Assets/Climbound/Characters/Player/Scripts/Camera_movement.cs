@@ -27,7 +27,6 @@ public class Camera_movement : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             cameraMovement.y = 1;
-            Debug.Log("Camera should move");
         }
 
     }
@@ -37,7 +36,6 @@ public class Camera_movement : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             cameraMovement.y = 0;
-            Debug.Log("Camera exit");
         }
     }
 

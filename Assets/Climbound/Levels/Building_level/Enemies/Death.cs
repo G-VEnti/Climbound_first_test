@@ -19,14 +19,10 @@ public class Death : MonoBehaviour
         enemyAnimator.SetBool("isAttacked", isAttacked);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void beingAttacekd()
     {
-        if (collision.gameObject.CompareTag("Attack") && Keyboard.current.shiftKey.isPressed)
-        {
-            isAttacked = true;
-        }
+        isAttacked = true;
     }
-
     private void Despawn()
     {
         Destroy(gameObject);
