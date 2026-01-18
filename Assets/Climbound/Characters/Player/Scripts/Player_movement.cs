@@ -1,15 +1,19 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Player_movement : MonoBehaviour
 {
     public float playerSpeed;
     public float jumpForce;
     public float reboundForce;
+    public float verticalAttackForce;
     public float attackRadius;
+    public float cameraSpeed;
+    
     private float rayLength = 0.2f;
-
     private float horizontalLimit = 9;
 
     public int killsCounter;
@@ -20,6 +24,8 @@ public class Player_movement : MonoBehaviour
     private bool isJumping = false;
     private bool isAttacking = false;
 
+    private bool verticalAttackActive = true;
+
     private enum playerDirections { Right, Left };
     playerDirections playerDirection;
 
@@ -27,6 +33,8 @@ public class Player_movement : MonoBehaviour
     public GameObject attackPoint;
     public GameObject leftFoot;
     public GameObject rightFoot;
+    public GameObject energyFull;
+    public GameObject energyEmpty;
     public LayerMask enemiesLayer;
     public LayerMask groundLayer;
     private ContactFilter2D contactFilter = new ContactFilter2D();
@@ -54,6 +62,8 @@ public class Player_movement : MonoBehaviour
         contactFilter.useLayerMask = true;
 
         originalScale = transform.localScale;
+
+        energyEmpty.SetActive(false);
 
 
     }
@@ -84,8 +94,25 @@ public class Player_movement : MonoBehaviour
         // Jump condition
         if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
         {
-            Debug.Log("is jumping");
             playerRb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+        }
+
+        // Vertical attack
+        if (Keyboard.current.wKey.wasPressedThisFrame && verticalAttackActive == true)
+        {
+            playerRb.linearVelocity = new Vector2(0, 0);
+            playerRb.AddForce(transform.up * verticalAttackForce, ForceMode2D.Impulse);
+            verticalAttackActive = false;
+
+            energyFull.SetActive(false);
+            energyEmpty.SetActive(true);
+        }
+
+        // Level restart
+
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            SceneManager.LoadScene("Building_level");
         }
 
 
@@ -102,7 +129,7 @@ public class Player_movement : MonoBehaviour
         }
 
         //Jumping
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
         {
             isJumping = true;
         }
@@ -162,6 +189,10 @@ public class Player_movement : MonoBehaviour
         // Rebound
         if (enemiesColliders.Count > 0)
         {
+            // Actives vertical attack
+            verticalAttackActive = true;
+            energyEmpty.SetActive(false);
+            energyFull.SetActive(true);
             // Resets player rigibody velocity
             playerRb.linearVelocity = new Vector2(0, 0);
             playerRb.AddForce(transform.up * reboundForce, ForceMode2D.Impulse);
@@ -170,7 +201,11 @@ public class Player_movement : MonoBehaviour
         }
 
 
-        Debug.Log(killsCounter);
+        // Camera following
+        if (transform.position.y <= (Camera.main.transform.position.y - 3.5)|| transform.position.y >= Camera.main.transform.position.y)
+        {
+            Camera.main.transform.position = Vector3.MoveTowards(Camera.main.transform.position, new Vector3(0, transform.position.y, Camera.main.transform.position.z), cameraSpeed * Time.deltaTime);
+        }
     }
 
 
