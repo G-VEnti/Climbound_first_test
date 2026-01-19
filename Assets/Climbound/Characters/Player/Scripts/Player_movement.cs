@@ -9,10 +9,11 @@ public class Player_movement : MonoBehaviour
     public float playerSpeed;
     public float jumpForce;
     public float reboundForce;
+    public float dmgRecievedForce;
     public float verticalAttackForce;
     public float attackRadius;
     public float cameraSpeed;
-    
+
     private float rayLength = 0.2f;
     private float horizontalLimit = 9;
 
@@ -23,6 +24,7 @@ public class Player_movement : MonoBehaviour
     private bool isRunning = false;
     private bool isJumping = false;
     private bool isAttacking = false;
+    private bool canMove = true;
 
     private bool verticalAttackActive = true;
 
@@ -79,102 +81,111 @@ public class Player_movement : MonoBehaviour
         Debug.DrawRay(leftFoot.transform.position, Vector2.down * rayLength, Color.red);
         Debug.DrawRay(rightFoot.transform.position, Vector2.down * rayLength, Color.red);
 
-        // Movement
-        Vector3 playerMovement = new Vector3(0, 0, 0);
-
-        if (Keyboard.current.aKey.isPressed)
+        if (canMove == true)
         {
-            playerMovement.x = -1;
-        }
-        if (Keyboard.current.dKey.isPressed)
-        {
-            playerMovement.x = 1;
+
+            // Movement
+            Vector3 playerMovement = new Vector3(0, 0, 0);
+
+            if (Keyboard.current.aKey.isPressed)
+            {
+                playerMovement.x = -1;
+            }
+            if (Keyboard.current.dKey.isPressed)
+            {
+                playerMovement.x = 1;
+            }
+
+            // Jump condition
+            if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
+            {
+                playerRb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+            }
+
+            // Vertical attack
+            if (Keyboard.current.wKey.wasPressedThisFrame && verticalAttackActive == true)
+            {
+                playerRb.linearVelocity = new Vector2(0, 0);
+                playerRb.AddForce(transform.up * verticalAttackForce, ForceMode2D.Impulse);
+                verticalAttackActive = false;
+
+                energyFull.SetActive(false);
+                energyEmpty.SetActive(true);
+
+            }
+
+            //Changing animation state
+            //Running
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.dKey.isPressed)
+            {
+                isRunning = true;
+            }
+            else
+            {
+                isRunning = false;
+            }
+
+            //Jumping
+            if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
+            {
+                isJumping = true;
+            }
+            else
+            {
+                isJumping = false;
+            }
+
+            //Attacking
+            if (Keyboard.current.shiftKey.wasPressedThisFrame)
+            {
+                isAttacking = true;
+            }
+            else
+            {
+                isAttacking = false;
+            }
+
+            //Changing animation direction
+            switch (playerDirection)
+            {
+                case playerDirections.Right:
+                    if (Keyboard.current.aKey.isPressed)
+                    {
+                        transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
+                        dmgRecievedForce *= -1;
+                        playerDirection = playerDirections.Left;
+                    }
+                    break;
+                case playerDirections.Left:
+                    if (Keyboard.current.dKey.isPressed)
+                    {
+                        transform.localScale = originalScale;
+                        dmgRecievedForce *= -1;
+                        playerDirection = playerDirections.Right;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            transform.position += playerMovement * playerSpeed * Time.deltaTime;
+            transform.eulerAngles = new Vector3(0, 0, 0);
+
         }
 
-        // Jump condition
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
-        {
-            playerRb.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
-        }
 
-        // Vertical attack
-        if (Keyboard.current.wKey.wasPressedThisFrame && verticalAttackActive == true)
-        {
-            playerRb.linearVelocity = new Vector2(0, 0);
-            playerRb.AddForce(transform.up * verticalAttackForce, ForceMode2D.Impulse);
-            verticalAttackActive = false;
-
-            energyFull.SetActive(false);
-            energyEmpty.SetActive(true);
-        }
 
         // Level restart
-
         if (Keyboard.current.rKey.wasPressedThisFrame)
         {
             SceneManager.LoadScene("Building_level");
         }
 
 
-
-        //Changing animation state
-        //Running
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.dKey.isPressed)
-        {
-            isRunning = true;
-        }
-        else
-        {
-            isRunning = false;
-        }
-
-        //Jumping
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded() == true)
-        {
-            isJumping = true;
-        }
-        else
-        {
-            isJumping = false;
-        }
-
-        //Attacking
-        if (Keyboard.current.shiftKey.wasPressedThisFrame)
-        {
-            isAttacking = true;
-        }
-        else
-        {
-            isAttacking = false;
-        }
-
-        //Changing animation direction
-        switch (playerDirection)
-        {
-            case playerDirections.Right:
-                if (Keyboard.current.aKey.isPressed)
-                {
-                    transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
-                    playerDirection = playerDirections.Left;
-                }
-                break;
-            case playerDirections.Left:
-                if (Keyboard.current.dKey.isPressed)
-                {
-                    transform.localScale = originalScale;
-                    playerDirection = playerDirections.Right;
-                }
-                break;
-            default:
-                break;
-        }
-
         playerAnimator.SetBool("isRunning", isRunning);
         playerAnimator.SetBool("isJumping", isJumping);
         playerAnimator.SetBool("isAttacking", isAttacking);
 
-        transform.position += playerMovement * playerSpeed * Time.deltaTime;
-        transform.eulerAngles = new Vector3(0, 0, 0);
 
         // Horizontal teleport
         if (transform.position.x > horizontalLimit)
@@ -189,10 +200,14 @@ public class Player_movement : MonoBehaviour
         // Rebound
         if (enemiesColliders.Count > 0)
         {
+            // Disables detected colliders
+
+
             // Actives vertical attack
             verticalAttackActive = true;
             energyEmpty.SetActive(false);
             energyFull.SetActive(true);
+
             // Resets player rigibody velocity
             playerRb.linearVelocity = new Vector2(0, 0);
             playerRb.AddForce(transform.up * reboundForce, ForceMode2D.Impulse);
@@ -202,14 +217,14 @@ public class Player_movement : MonoBehaviour
 
 
         // Camera following
-        if (transform.position.y <= (Camera.main.transform.position.y - 3.5)|| transform.position.y >= Camera.main.transform.position.y)
+        if (transform.position.y <= (Camera.main.transform.position.y - 3.5) || transform.position.y >= Camera.main.transform.position.y)
         {
             Camera.main.transform.position = Vector3.MoveTowards(Camera.main.transform.position, new Vector3(0, transform.position.y, Camera.main.transform.position.z), cameraSpeed * Time.deltaTime);
         }
     }
 
 
-
+    // Checks with RayCastHit2D if thenplayer is touching any object in the layer "Ground"
     private bool isGrounded()
     {
         RaycastHit2D floorHitLeftFoot;
@@ -233,7 +248,8 @@ public class Player_movement : MonoBehaviour
     }
 
 
-
+    // Checks if any enemy collider its in the OverlapCircle of the attack, saves the collider in a list and executes
+    // the function beingAttacked() from the script Death
     public void enemiesAttacked()
     {
         int enemies = Physics2D.OverlapCircle(attackPoint.transform.position, attackRadius, contactFilter, enemiesColliders);
@@ -242,11 +258,24 @@ public class Player_movement : MonoBehaviour
         {
             Death deathScript = i.GetComponent<Death>();
             deathScript.beingAttacekd();
+            i.enabled = false;
         }
     }
 
+    // Draws a circle with the same size of the attack "Hit box"
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(attackPoint.transform.position, attackRadius);
+    }
+
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == 7)
+        {
+            playerRb.linearVelocity = new Vector2(0, 0);
+            playerRb.AddForce(new Vector2(-1 * dmgRecievedForce, 0), ForceMode2D.Impulse);
+            
+        }
     }
 }

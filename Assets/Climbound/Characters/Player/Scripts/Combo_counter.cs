@@ -5,7 +5,7 @@ public class Combo_counter : MonoBehaviour
 {
 
     public GameObject player;
-    public GameObject textPosition;
+    public GameObject comboTextPos;
     public TMP_Text killsCounterText;
     private int killsCounter;
     private Player_movement playerScript;
@@ -18,7 +18,7 @@ public class Combo_counter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = textPosition.transform.position;
+        transform.position = comboTextPos.transform.position;
 
         killsCounter = playerScript.killsCounter;
 
