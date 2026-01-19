@@ -60,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 38
+  spritePixelsToUnits: 35
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -112,12 +112,12 @@ TextureImporter:
       name: male_hero-combo_1_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 48
-        width: 100
-        height: 38
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -134,12 +134,12 @@ TextureImporter:
       name: male_hero-combo_1_1
       rect:
         serializedVersion: 2
-        x: 142
-        y: 48
-        width: 100
-        height: 38
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -156,12 +156,12 @@ TextureImporter:
       name: male_hero-combo_1_2
       rect:
         serializedVersion: 2
-        x: 274
-        y: 48
-        width: 93
-        height: 38
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -191,7 +191,6 @@ TextureImporter:
       male_hero-combo_1_0: -817223447185994114
       male_hero-combo_1_1: 7021625484444776659
       male_hero-combo_1_2: 7282760613219019248
-      male_hero-combo_1_3: 1264393231116710960
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -13,6 +13,7 @@ public class Player_movement : MonoBehaviour
     public float verticalAttackForce;
     public float attackRadius;
     public float cameraSpeed;
+    public float playerHealth = 100;
 
     private float rayLength = 0.2f;
     private float horizontalLimit = 9;
@@ -24,6 +25,8 @@ public class Player_movement : MonoBehaviour
     private bool isRunning = false;
     private bool isJumping = false;
     private bool isAttacking = false;
+    private bool isHurt = false;
+    private bool isDead = false;
     private bool canMove = true;
 
     private bool verticalAttackActive = true;
@@ -73,6 +76,14 @@ public class Player_movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (playerHealth <= 0)
+        {
+            isDead = true;
+            canMove = false;
+            Destroy(playerRb);
+        }
+
+
         if (isGrounded() == true)
         {
             killsCounter = 0;
@@ -81,12 +92,12 @@ public class Player_movement : MonoBehaviour
         Debug.DrawRay(leftFoot.transform.position, Vector2.down * rayLength, Color.red);
         Debug.DrawRay(rightFoot.transform.position, Vector2.down * rayLength, Color.red);
 
+        Vector3 playerMovement = new Vector3(0, 0, 0);
+
         if (canMove == true)
         {
 
             // Movement
-            Vector3 playerMovement = new Vector3(0, 0, 0);
-
             if (Keyboard.current.aKey.isPressed)
             {
                 playerMovement.x = -1;
@@ -167,13 +178,10 @@ public class Player_movement : MonoBehaviour
                 default:
                     break;
             }
-
-            transform.position += playerMovement * playerSpeed * Time.deltaTime;
-            transform.eulerAngles = new Vector3(0, 0, 0);
-
         }
 
-
+        transform.position += playerMovement * playerSpeed * Time.deltaTime;
+        transform.eulerAngles = new Vector3(0, 0, 0);
 
         // Level restart
         if (Keyboard.current.rKey.wasPressedThisFrame)
@@ -185,6 +193,8 @@ public class Player_movement : MonoBehaviour
         playerAnimator.SetBool("isRunning", isRunning);
         playerAnimator.SetBool("isJumping", isJumping);
         playerAnimator.SetBool("isAttacking", isAttacking);
+        playerAnimator.SetBool("isHurt", isHurt);
+        playerAnimator.SetBool("isDead", isDead);
 
 
         // Horizontal teleport
@@ -269,13 +279,30 @@ public class Player_movement : MonoBehaviour
     }
 
 
+    // If player collides with enemy actives hurt animation + player recoil
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == 7)
         {
             playerRb.linearVelocity = new Vector2(0, 0);
             playerRb.AddForce(new Vector2(-1 * dmgRecievedForce, 0), ForceMode2D.Impulse);
-            
+            isHurt = true;
+            canMove = false;
+            playerHealth -= 20;
+            Debug.Log(playerHealth);
         }
     }
+
+
+    private void deathAnimation()
+    {
+        Destroy(gameObject);
+    }
+
+    private void hurtFinish()
+    {
+        isHurt = false;
+        canMove = true;
+    }
+
 }
