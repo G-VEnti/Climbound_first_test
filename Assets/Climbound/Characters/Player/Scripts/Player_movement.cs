@@ -19,6 +19,7 @@ public class Player_movement : MonoBehaviour
     private float horizontalLimit = 9;
 
     public int killsCounter;
+    public int energyCounter;
 
     private Animator playerAnimator;
 
@@ -29,7 +30,7 @@ public class Player_movement : MonoBehaviour
     private bool isDead = false;
     private bool canMove = true;
 
-    private bool verticalAttackActive = true;
+    public bool verticalAttackActive = true;
 
     private enum playerDirections { Right, Left };
     playerDirections playerDirection;
@@ -38,8 +39,6 @@ public class Player_movement : MonoBehaviour
     public GameObject attackPoint;
     public GameObject leftFoot;
     public GameObject rightFoot;
-    public GameObject energyFull;
-    public GameObject energyEmpty;
     public LayerMask enemiesLayer;
     public LayerMask groundLayer;
     private ContactFilter2D contactFilter = new ContactFilter2D();
@@ -68,9 +67,7 @@ public class Player_movement : MonoBehaviour
 
         originalScale = transform.localScale;
 
-        energyEmpty.SetActive(false);
-
-
+        energyCounter = 3;
     }
 
     // Update is called once per frame
@@ -114,15 +111,11 @@ public class Player_movement : MonoBehaviour
             }
 
             // Vertical attack
-            if (Keyboard.current.wKey.wasPressedThisFrame && verticalAttackActive == true)
+            if (Keyboard.current.wKey.wasPressedThisFrame && energyCounter >= 3)
             {
                 playerRb.linearVelocity = new Vector2(0, 0);
                 playerRb.AddForce(transform.up * verticalAttackForce, ForceMode2D.Impulse);
-                verticalAttackActive = false;
-
-                energyFull.SetActive(false);
-                energyEmpty.SetActive(true);
-
+                energyCounter = 0;
             }
 
             //Changing animation state
@@ -181,13 +174,7 @@ public class Player_movement : MonoBehaviour
         }
 
         transform.position += playerMovement * playerSpeed * Time.deltaTime;
-        transform.eulerAngles = new Vector3(0, 0, 0);
-
-        // Level restart
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-        {
-            SceneManager.LoadScene("Building_level");
-        }
+        transform.eulerAngles = new Vector3(0, 0, 0);       
 
 
         playerAnimator.SetBool("isRunning", isRunning);
@@ -210,13 +197,9 @@ public class Player_movement : MonoBehaviour
         // Rebound
         if (enemiesColliders.Count > 0)
         {
-            // Disables detected colliders
-
-
-            // Actives vertical attack
-            verticalAttackActive = true;
-            energyEmpty.SetActive(false);
-            energyFull.SetActive(true);
+            // Adds 1 to the energy counter
+            energyCounter++;
+            
 
             // Resets player rigibody velocity
             playerRb.linearVelocity = new Vector2(0, 0);
