@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: IndustrialTile_53_0
+  m_Name: IndustrialTile_15_0 1
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: -128515688306689903, guid: c69ae0f2706f1b345a7cdca1f783105a, type: 3}
+  m_Sprite: {fileID: 1424010860088909676, guid: d7a46f8cd1e50624995efccb93b3227d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
